@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-full bg-slate-950 text-slate-100 selection:bg-brand-500 selection:text-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PulseNet - Социальная Сеть</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.4);
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.7);
+        }
+        @keyframes heartPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.35); }
+            100% { transform: scale(1); }
+        }
+        .animate-heart {
+            animation: heartPulse 0.3s ease-in-out;
+        }
+        button, a, input, textarea {
+            touch-action: manipulation;
+        }
+        .story-progress-bar {
+            transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body class="h-full font-sans antialiased bg-slate-950 text-slate-100 flex flex-col min-h-screen">
+
+    <!-- Global Toast Notification Center -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ========================================== -->
+    <!-- SCREEN 1: AUTHENTICATION / REGISTRATION GATE -->
+    <!-- ========================================== -->
+    <div id="authGateScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-900/40 via-slate-950 to-slate-950 overflow-y-auto">
+        <div class="w-full max-w-md my-auto py-6">
+            
+            <!-- Brand Logo Header -->
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-purple-500 flex items-center justify-center shadow-2xl shadow-brand-500/30 mx-auto mb-3">
+                    <i class="fa-solid fa-bolt text-3xl text-white"></i>
+                </div>
+                <h1 class="text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">
+                    PulseNet
+                </h1>
+                <p class="text-xs text-slate-400 font-medium mt-1">Создайте профиль или войдите для доступа</p>
+            </div>
+
+            <!-- Auth Mode Switcher Tabs -->
+            <div class="glass p-1.5 rounded-2xl mb-5 flex items-center gap-1 border border-slate-800">
+                <button id="authTabRegister" onclick="app.switchAuthMode('register')" class="flex-1 py-2 text-xs font-bold rounded-xl bg-brand-600 text-white transition shadow-md">
+                    <i class="fa-solid fa-user-plus mr-1.5"></i> Новый аккаунт
+                </button>
+                <button id="authTabDemo" onclick="app.switchAuthMode('demo')" class="flex-1 py-2 text-xs font-bold rounded-xl text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-users mr-1.5"></i> Готовые профили
+                </button>
+            </div>
+
+            <!-- Form A: Create New Account -->
+            <div id="authFormRegister" class="glass rounded-3xl p-6 shadow-2xl space-y-4">
+                <form onsubmit="app.handleAuthSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Имя и Фамилия <span class="text-rose-400">*</span></label>
+                        <div class="relative">
+                            <i class="fa-regular fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                            <input type="text" id="authFullName" required placeholder="Например: Александр Волков" 
+                                class="w-full bg-slate-900/90 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Никнейм (@username) <span class="text-rose-400">*</span></label>
+                        <div class="relative">
+                            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-bold">@</span>
+                            <input type="text" id="authUsername" required placeholder="Samori" 
+                                class="w-full bg-slate-900/90 border border-slate-800 rounded-xl pl-9 pr-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                        </div>
+                        <p class="text-[10px] text-amber-400 mt-1"><i class="fa-solid fa-shield-halved mr-1"></i>Никнейм <b>Samori</b> получает права Главного Администратора!</p>
+                    </div>
+
+                    <!-- File Upload for Avatar (PC / Gallery) -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Аватар профиля</label>
+                        
+                        <div class="flex items-center gap-3 mb-2">
+                            <div id="authAvatarPreviewBox" class="w-12 h-12 rounded-full bg-slate-800 border-2 border-brand-500 overflow-hidden flex items-center justify-center flex-shrink-0">
+                                <img id="authAvatarPreview" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" class="w-full h-full object-cover">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <label for="authAvatarFile" class="cursor-pointer inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-700 transition w-full justify-center">
+                                    <i class="fa-solid fa-upload text-brand-400"></i>
+                                    <span>Загрузить из Галереи / ПК</span>
+                                </label>
+                                <input type="file" id="authAvatarFile" accept="image/*" onchange="app.handleAvatarFileSelect(event, 'auth')" class="hidden">
+                            </div>
+                        </div>
+
+                        <span class="text-[10px] text-slate-400 block mb-1">Или выберите готовый аватар:</span>
+                        <div class="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar" id="authAvatarSelector"></div>
+                        <input type="hidden" id="selectedAuthAvatar" value="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Статус или О себе</label>
+                        <textarea id="authBio" rows="2" placeholder="Расскажите о себе, интересах или вашей работе..." 
+                            class="w-full bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition resize-none"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-brand-600/30 active:scale-[0.98] text-sm flex items-center justify-center gap-2">
+                        <span>Зарегистрироваться и Войти</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Form B: Select Demo Account -->
+            <div id="authFormDemo" class="glass rounded-3xl p-6 shadow-2xl hidden space-y-3">
+                <p class="text-xs text-slate-400 mb-2">Выберите аккаунт для мгновенного входа:</p>
+                <div id="authDemoUsersList" class="space-y-2 max-h-80 overflow-y-auto custom-scrollbar"></div>
+            </div>
+
+            <p class="text-center text-[11px] text-slate-500 mt-6">
+                PulseNet &copy; 2026. Общение, публикации и администрирование.
+            </p>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SCREEN 2: MAIN SOCIAL NETWORK APP VIEW     -->
+    <!-- ========================================== -->
+    <div id="mainAppScreen" class="hidden flex-col flex-1 min-h-screen">
+        
+        <!-- Top Navigation Header -->
+        <header class="sticky top-0 z-40 w-full glass border-b border-slate-800/80 px-3 sm:px-6 py-2.5">
+            <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+                
+                <!-- Brand Logo -->
+                <div class="flex items-center gap-2.5 cursor-pointer" onclick="app.switchTab('feed')">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                        <i class="fa-solid fa-bolt text-white text-lg sm:text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-black tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">
+                            PulseNet
+                        </h1>
+                    </div>
+                </div>
+
+                <!-- Global Search Bar -->
+                <div class="flex-1 max-w-sm relative hidden sm:block">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="searchInput" oninput="app.handleSearch(this.value)" placeholder="Поиск людей и публикаций..." 
+                        class="w-full bg-slate-900/90 border border-slate-800 rounded-full pl-9 pr-4 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                    <div id="searchResults" class="hidden absolute left-0 right-0 top-full mt-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2 z-50 max-h-80 overflow-y-auto custom-scrollbar"></div>
+                </div>
+
+                <!-- Header Actions & Current User Dropdown -->
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <button onclick="app.openNewPostModal()" class="flex items-center gap-1.5 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-medium px-3.5 py-1.5 rounded-xl text-xs transition shadow-lg shadow-brand-600/20 active:scale-95">
+                        <i class="fa-solid fa-plus"></i>
+                        <span class="hidden sm:inline">Запись</span>
+                    </button>
+
+                    <!-- Notifications Quick Bell Button -->
+                    <button onclick="app.switchTab('notifications')" class="relative p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 transition">
+                        <i class="fa-regular fa-bell text-sm"></i>
+                        <span id="notifBadge" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-slate-950"></span>
+                    </button>
+
+                    <!-- User Profile Dropdown Toggle -->
+                    <div class="relative">
+                        <button id="userProfileBtn" onclick="app.toggleUserDropdown()" class="flex items-center gap-2 p-1 rounded-full hover:bg-slate-800/80 transition focus:outline-none">
+                            <div class="relative">
+                                <img id="headerUserAvatar" src="" alt="Avatar" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover ring-2 ring-brand-500/50">
+                                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-slate-950"></span>
+                            </div>
+                            <span id="headerUserName" class="hidden md:block text-xs font-semibold text-slate-200 max-w-[100px] truncate"></span>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 hidden sm:block"></i>
+                        </button>
+
+                        <div id="userDropdown" class="hidden absolute right-0 top-full mt-2 w-56 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl py-2 z-50 divide-y divide-slate-800/80">
+                            <div class="px-4 py-2.5">
+                                <p id="dropdownFullName" class="text-xs font-bold text-slate-100 truncate"></p>
+                                <p id="dropdownUsername" class="text-[11px] text-brand-400 truncate"></p>
+                            </div>
+                            <div class="py-1">
+                                <button onclick="app.switchTab('profile'); app.toggleUserDropdown();" class="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2.5 transition">
+                                    <i class="fa-regular fa-user text-slate-400 w-4"></i> Мой профиль
+                                </button>
+                                <button id="dropdownAdminBtn" onclick="app.switchTab('admin'); app.toggleUserDropdown();" class="hidden w-full text-left px-4 py-2 text-xs text-amber-400 hover:bg-amber-950/40 flex items-center gap-2.5 transition font-bold">
+                                    <i class="fa-solid fa-shield-halved text-amber-400 w-4"></i> Админ-Панель
+                                </button>
+                            </div>
+                            <div class="py-1">
+                                <button onclick="app.openAuthGate()" class="w-full text-left px-4 py-2 text-xs text-rose-400 hover:bg-slate-800 flex items-center gap-2.5 transition font-semibold">
+                                    <i class="fa-solid fa-right-from-bracket w-4"></i> Выйти из аккаунта
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </header>
+
+        <!-- Main Responsive Content Container -->
+        <div class="max-w-7xl mx-auto w-full flex-1 px-2 sm:px-4 lg:px-8 py-4 sm:py-6 grid grid-cols-1 md:grid-cols-12 gap-5 mb-16 md:mb-0">
+
+            <!-- Left Navigation Sidebar -->
+            <aside class="md:col-span-3 lg:col-span-3 hidden md:block">
+                <div class="sticky top-20 flex flex-col gap-4">
+                    
+                    <!-- Navigation Menu -->
+                    <div class="glass rounded-2xl p-2.5 flex flex-col gap-1">
+                        <button id="nav-feed" onclick="app.switchTab('feed')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-300 hover:bg-slate-800/80 hover:text-white transition group">
+                            <i class="fa-solid fa-house text-base text-brand-400 group-hover:scale-110 transition-transform"></i>
+                            <span>Лента</span>
+                        </button>
+                        <button id="nav-discover" onclick="app.switchTab('discover')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-300 hover:bg-slate-800/80 hover:text-white transition group">
+                            <i class="fa-solid fa-compass text-base text-purple-400 group-hover:scale-110 transition-transform"></i>
+                            <span>Обзор</span>
+                        </button>
+                        <button id="nav-messages" onclick="app.switchTab('messages')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-300 hover:bg-slate-800/80 hover:text-white transition group relative">
+                            <i class="fa-solid fa-paper-plane text-base text-sky-400 group-hover:scale-110 transition-transform"></i>
+                            <span>Сообщения</span>
+                        </button>
+                        <button id="nav-notifications" onclick="app.switchTab('notifications')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-300 hover:bg-slate-800/80 hover:text-white transition group">
+                            <i class="fa-solid fa-bell text-base text-amber-400 group-hover:scale-110 transition-transform"></i>
+                            <span>Уведомления</span>
+                        </button>
+                        <button id="nav-profile" onclick="app.switchTab('profile')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-300 hover:bg-slate-800/80 hover:text-white transition group">
+                            <i class="fa-solid fa-user-gear text-base text-emerald-400 group-hover:scale-110 transition-transform"></i>
+                            <span>Профиль</span>
+                        </button>
+                        <!-- Exclusive Admin Panel Menu Item -->
+                        <button id="nav-admin" onclick="app.switchTab('admin')" class="nav-btn hidden w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition group">
+                            <i class="fa-solid fa-shield-halved text-base text-amber-400 group-hover:scale-110 transition-transform"></i>
+                            <span>Админ-Панель</span>
+                        </button>
+                    </div>
+
+                    <!-- Current Account Card -->
+                    <div class="glass rounded-2xl p-3.5 flex flex-col gap-2.5">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Текущий профиль</span>
+                        <div class="flex items-center gap-2.5 bg-slate-900/70 p-2 rounded-xl border border-slate-800">
+                            <img id="sidebarUserAvatar" src="" class="w-9 h-9 rounded-full object-cover border border-brand-500">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-1">
+                                    <h4 id="sidebarUserName" class="text-xs font-bold text-slate-200 truncate"></h4>
+                                    <span id="sidebarAdminBadge" class="hidden text-[9px] font-black bg-amber-500 text-slate-950 px-1 rounded">ADMIN</span>
+                                </div>
+                                <p id="sidebarUserHandle" class="text-[10px] text-slate-400 truncate"></p>
+                            </div>
+                        </div>
+                        <button onclick="app.openAuthGate()" class="w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 font-medium rounded-xl transition border border-slate-700/50 flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-arrows-rotate text-brand-400 text-xs"></i>
+                            <span>Сменить аккаунт</span>
+                        </button>
+                    </div>
+
+                </div>
+            </aside>
+
+            <!-- Center Main Content Feed -->
+            <main class="md:col-span-9 lg:col-span-6 flex flex-col gap-5">
+
+                <!-- Blocked User Warning Alert Banner -->
+                <div id="blockedUserBanner" class="hidden glass bg-rose-950/80 border-rose-800 p-4 rounded-2xl text-rose-200 text-xs flex items-center gap-3">
+                    <i class="fa-solid fa-triangle-exclamation text-rose-400 text-2xl flex-shrink-0"></i>
+                    <div>
+                        <h4 class="font-bold text-rose-100 text-sm">Ваш аккаунт заблокирован</h4>
+                        <p>Администратор <b>@Samori</b> ограничил функции публикации, комментариев и отправки сообщений для вашего профиля.</p>
+                    </div>
+                </div>
+
+                <!-- TAB 1: FEED VIEW -->
+                <div id="tab-feed" class="tab-content flex flex-col gap-5">
+                    
+                    <!-- Stories Bar -->
+                    <div class="glass rounded-2xl p-3 overflow-hidden">
+                        <div class="flex items-center gap-3 overflow-x-auto custom-scrollbar pb-1">
+                            <div onclick="app.openNewPostModal()" class="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer group">
+                                <div class="w-12 h-12 rounded-full bg-slate-800 border-2 border-dashed border-brand-500/60 flex items-center justify-center group-hover:border-brand-400 group-hover:scale-105 transition">
+                                    <i class="fa-solid fa-plus text-brand-400 text-base"></i>
+                                </div>
+                                <span class="text-[10px] text-slate-300 font-medium">История</span>
+                            </div>
+                            <!-- Dynamic Stories Container -->
+                            <div id="storiesContainer" class="flex gap-3"></div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Post Creator -->
+                    <div class="glass rounded-2xl p-3.5 sm:p-4 shadow-xl">
+                        <div class="flex items-start gap-3">
+                            <img id="composerUserAvatar" src="" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border border-slate-700 flex-shrink-0">
+                            <div class="flex-1 min-w-0">
+                                <textarea id="composerInput" rows="2" placeholder="Что нового произошло сегодня? Напишите мысль..." 
+                                    class="w-full bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition resize-none"></textarea>
+                                
+                                <div id="composerMediaExpand" class="hidden mt-2 space-y-2">
+                                    <div class="flex items-center gap-2">
+                                        <label for="composerFile" class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+                                            <i class="fa-solid fa-upload text-brand-400"></i>
+                                            <span>Загрузить с ПК / Галереи</span>
+                                        </label>
+                                        <input type="file" id="composerFile" accept="image/*" onchange="app.handlePostFileSelect(event)" class="hidden">
+                                        <span class="text-[10px] text-slate-500">или URL:</span>
+                                    </div>
+                                    <input type="text" id="composerImageUrl" placeholder="Ссылка на фото (https://...)" 
+                                        class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500">
+                                    <div id="composerPreviewBox" class="hidden relative max-h-36 rounded-lg overflow-hidden border border-slate-700">
+                                        <img id="composerPreviewImg" src="" class="w-full h-36 object-cover">
+                                        <button onclick="app.clearComposerMedia()" class="absolute top-1 right-1 bg-slate-950/80 text-rose-400 p-1 rounded-full text-xs">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between mt-2.5 pt-2 border-t border-slate-800/80">
+                                    <div class="flex items-center gap-1.5">
+                                        <button onclick="app.toggleComposerMedia()" class="flex items-center gap-1 text-[11px] font-semibold text-slate-400 hover:text-brand-400 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800 transition">
+                                            <i class="fa-regular fa-image text-emerald-400"></i>
+                                            <span>Фото</span>
+                                        </button>
+                                        <button onclick="app.insertTagIntoComposer('#новости')" class="flex items-center gap-1 text-[11px] font-semibold text-slate-400 hover:text-brand-400 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800 transition">
+                                            <i class="fa-solid fa-hashtag text-purple-400"></i>
+                                            <span>Тег</span>
+                                        </button>
+                                    </div>
+                                    <button onclick="app.createPostFromComposer()" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold px-4 py-1.5 rounded-xl transition shadow-lg shadow-brand-600/30 active:scale-95">
+                                        Опубликовать
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filter Bar -->
+                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 px-1">
+                        <h3 class="text-sm font-bold text-slate-200">Публикации</h3>
+                        <div class="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
+                            <button onclick="app.setFeedFilter('all')" id="filter-all" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-brand-600 text-white transition">Все</button>
+                            <button onclick="app.setFeedFilter('popular')" id="filter-popular" class="px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-400 hover:text-white transition">🔥 Тренды</button>
+                            <button onclick="app.setFeedFilter('saved')" id="filter-saved" class="px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-400 hover:text-white transition">🔖 Сохраненное</button>
+                        </div>
+                    </div>
+
+                    <!-- Feed Posts Target Container -->
+                    <div id="postsFeedContainer" class="flex flex-col gap-4"></div>
+
+                </div>
+
+                <!-- TAB 2: DISCOVER & TRENDS -->
+                <div id="tab-discover" class="tab-content hidden flex-col gap-4">
+                    <div class="glass rounded-2xl p-4 sm:p-5">
+                        <h2 class="text-base font-bold text-slate-100 mb-1">Обзор и Популярное</h2>
+                        <p class="text-xs text-slate-400 mb-4">Находите интересные обсуждаемые темы и авторов</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-5" id="trendingHashtagsGrid"></div>
+
+                        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2.5">Рекомендуемые авторы</h3>
+                        <div id="recommendedUsersGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: MESSAGES / CHAT -->
+                <div id="tab-messages" class="tab-content hidden flex-col">
+                    <div class="glass rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-12 h-[520px] sm:h-[580px]">
+                        
+                        <div id="chatContactsCol" class="md:col-span-5 border-r border-slate-800 flex flex-col h-full bg-slate-900/50">
+                            <div class="p-3 border-b border-slate-800 flex items-center justify-between">
+                                <h3 class="font-bold text-xs sm:text-sm text-slate-100">Сообщения</h3>
+                                <span class="text-[10px] text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded-full border border-brand-500/20">Онлайн</span>
+                            </div>
+                            <div id="chatContactsList" class="flex-1 overflow-y-auto custom-scrollbar p-2 flex flex-col gap-1"></div>
+                        </div>
+
+                        <div id="chatWindowCol" class="md:col-span-7 hidden md:flex flex-col h-full bg-slate-950/40">
+                            <div id="activeChatHeader" class="p-3 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
+                                <span class="text-xs text-slate-400">Выберите диалог для общения</span>
+                            </div>
+                            
+                            <div id="chatMessagesBox" class="flex-1 p-3 sm:p-4 overflow-y-auto custom-scrollbar flex flex-col gap-2.5">
+                                <div class="text-center text-xs text-slate-500 my-auto">Выберите собеседника из списка слева</div>
+                            </div>
+
+                            <div id="chatInputArea" class="p-3 border-t border-slate-800 flex items-center gap-2 hidden bg-slate-900/80">
+                                <input type="text" id="chatMessageInput" placeholder="Напишите сообщение..." 
+                                    onkeypress="if(event.key==='Enter') app.sendChatMessage()"
+                                    class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500">
+                                <button onclick="app.sendChatMessage()" class="bg-brand-600 hover:bg-brand-500 text-white p-2 rounded-xl transition shadow-lg shadow-brand-600/30">
+                                    <i class="fa-solid fa-paper-plane text-xs px-1"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- TAB 4: NOTIFICATIONS -->
+                <div id="tab-notifications" class="tab-content hidden flex-col gap-4">
+                    <div class="glass rounded-2xl p-4">
+                        <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+                            <h2 class="text-base font-bold text-slate-100 flex items-center gap-2">
+                                <i class="fa-solid fa-bell text-amber-400"></i> Уведомления
+                            </h2>
+                            <button onclick="app.clearNotifications()" class="text-xs text-slate-400 hover:text-white transition">Очистить</button>
+                        </div>
+                        <div id="notificationsList" class="flex flex-col gap-2.5"></div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: PROFILE VIEW -->
+                <div id="tab-profile" class="tab-content hidden flex-col gap-5">
+                    <div class="glass rounded-2xl overflow-hidden relative">
+                        <div class="h-32 sm:h-44 w-full bg-gradient-to-r from-brand-900 via-indigo-900 to-slate-900 relative"></div>
+
+                        <div class="p-4 sm:p-5 pt-0 relative">
+                            <div class="flex flex-row items-end justify-between -mt-12 sm:-mt-16 gap-3 mb-3">
+                                <img id="profileAvatar" src="" class="w-20 h-20 sm:w-28 sm:h-28 rounded-full object-cover ring-4 ring-slate-950 shadow-2xl bg-slate-900">
+                                <button onclick="app.openEditProfileModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs px-3.5 py-2 rounded-xl border border-slate-700 transition">
+                                    <i class="fa-solid fa-pen mr-1 text-slate-400"></i> Редактировать
+                                </button>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h2 id="profileFullName" class="text-xl sm:text-2xl font-black text-slate-100"></h2>
+                                    <span id="profileAdminBadge" class="hidden text-xs font-black bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full">ADMIN</span>
+                                </div>
+                                <p id="profileHandle" class="text-xs sm:text-sm font-semibold text-brand-400 mb-2"></p>
+                                <p id="profileBio" class="text-xs text-slate-300 mb-4 leading-relaxed"></p>
+
+                                <div class="flex items-center gap-5 py-2.5 border-y border-slate-800/80 text-xs">
+                                    <div>
+                                        <span id="profilePostCount" class="font-bold text-white">0</span>
+                                        <span class="text-slate-400"> Записей</span>
+                                    </div>
+                                    <div>
+                                        <span id="profileFollowersCount" class="font-bold text-white">128</span>
+                                        <span class="text-slate-400"> Подписчиков</span>
+                                    </div>
+                                    <div>
+                                        <span id="profileFollowingCount" class="font-bold text-white">42</span>
+                                        <span class="text-slate-400"> Подписок</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider px-1">Мои публикации</h3>
+                    <div id="profilePostsContainer" class="flex flex-col gap-4"></div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- TAB 6: EXCLUSIVE ADMIN PANEL (@Samori)      -->
+                <!-- ========================================== -->
+                <div id="tab-admin" class="tab-content hidden flex-col gap-5">
+                    
+                    <!-- Header Banner -->
+                    <div class="glass rounded-2xl p-5 border-amber-500/40 bg-gradient-to-r from-slate-900 via-amber-950/30 to-slate-900">
+                        <div class="flex items-center justify-between flex-wrap gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-amber-400 text-2xl shadow-lg">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-xl font-black text-white flex items-center gap-2">
+                                        Панель Администратора <span class="text-xs bg-amber-500 text-slate-950 px-2 py-0.5 rounded font-black">@Samori</span>
+                                    </h2>
+                                    <p class="text-xs text-slate-400">Управление пользователями, статистика и рассмотрение жалоб</p>
+                                </div>
+                            </div>
+                            <span class="text-xs bg-slate-800 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-xl font-semibold flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Системы в норме
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Dashboard Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="glass p-3.5 rounded-2xl border-slate-800 flex flex-col">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Пользователей</span>
+                            <span id="statTotalUsers" class="text-2xl font-black text-indigo-400 mt-1">0</span>
+                        </div>
+                        <div class="glass p-3.5 rounded-2xl border-slate-800 flex flex-col">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Постов</span>
+                            <span id="statTotalPosts" class="text-2xl font-black text-purple-400 mt-1">0</span>
+                        </div>
+                        <div class="glass p-3.5 rounded-2xl border-slate-800 flex flex-col">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Лайков / Комментов</span>
+                            <span id="statTotalInteractions" class="text-2xl font-black text-emerald-400 mt-1">0</span>
+                        </div>
+                        <div class="glass p-3.5 rounded-2xl border-slate-800 flex flex-col">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Активных Жалоб</span>
+                            <span id="statTotalReports" class="text-2xl font-black text-rose-400 mt-1">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Admin Tabs: Reports / Users Management -->
+                    <div class="glass rounded-2xl p-4 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2">
+                                <i class="fa-solid fa-flag text-rose-400"></i> Жалобы от пользователей
+                            </h3>
+                            <span id="reportsCountBadge" class="text-xs bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold px-2.5 py-0.5 rounded-full">0 жалоб</span>
+                        </div>
+                        
+                        <div id="adminReportsList" class="flex flex-col gap-3"></div>
+                    </div>
+
+                    <!-- Users Management Table -->
+                    <div class="glass rounded-2xl p-4 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                            <i class="fa-solid fa-users-gear text-brand-400"></i> Все пользователи (Управление доступом)
+                        </h3>
+                        <div id="adminUsersList" class="flex flex-col gap-2"></div>
+                    </div>
+
+                </div>
+
+            </main>
+
+            <!-- Right Sidebar Widget -->
+            <aside class="md:col-span-3 lg:col-span-3 hidden lg:block">
+                <div class="sticky top-20 flex flex-col gap-4">
+                    
+                    <div class="glass rounded-2xl p-4">
+                        <h3 class="text-xs font-extrabold text-slate-200 mb-2.5 flex items-center gap-2">
+                            <i class="fa-solid fa-fire text-amber-500"></i>
+                            <span>Актуальные теги</span>
+                        </h3>
+                        <div id="sidebarHashtags" class="flex flex-col gap-2"></div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-4">
+                        <h3 class="text-xs font-extrabold text-slate-200 mb-2.5 flex items-center gap-2">
+                            <i class="fa-solid fa-user-plus text-brand-400"></i>
+                            <span>Рекомендуем</span>
+                        </h3>
+                        <div id="sidebarSuggestedUsers" class="flex flex-col gap-2.5"></div>
+                    </div>
+
+                </div>
+            </aside>
+
+        </div>
+
+        <!-- Mobile Bottom Navigation Toolbar -->
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 glass border-t border-slate-800 z-40 px-2 py-2 flex items-center justify-around">
+            <button onclick="app.switchTab('feed')" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-brand-400">
+                <i class="fa-solid fa-house text-base"></i>
+                <span class="text-[9px]">Лента</span>
+            </button>
+            <button onclick="app.switchTab('discover')" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-purple-400">
+                <i class="fa-solid fa-compass text-base"></i>
+                <span class="text-[9px]">Обзор</span>
+            </button>
+            <button onclick="app.openNewPostModal()" class="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center text-base shadow-lg shadow-brand-600/40 -mt-4 ring-4 ring-slate-950">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+            <button onclick="app.switchTab('messages')" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-sky-400">
+                <i class="fa-solid fa-paper-plane text-base"></i>
+                <span class="text-[9px]">Чаты</span>
+            </button>
+            <button onclick="app.switchTab('profile')" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-emerald-400">
+                <i class="fa-solid fa-user text-base"></i>
+                <span class="text-[9px]">Профиль</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODALS                                     -->
+    <!-- ========================================== -->
+
+    <!-- Story Fullscreen Viewer Modal -->
+    <div id="storyViewerModal" class="fixed inset-0 bg-slate-950/95 z-50 flex items-center justify-center p-2 hidden">
+        <div class="relative w-full max-w-sm h-[80vh] bg-slate-900 rounded-3xl overflow-hidden flex flex-col justify-between p-4 border border-slate-800 shadow-2xl">
+            <!-- Story Progress Bar Header -->
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-3">
+                <div id="storyProgressBar" class="bg-brand-500 h-full w-0 story-progress-bar"></div>
+            </div>
+
+            <!-- Story Author Info -->
+            <div class="flex items-center justify-between z-10">
+                <div class="flex items-center gap-2">
+                    <img id="storyUserAvatar" src="" class="w-8 h-8 rounded-full object-cover border border-white/20">
+                    <div>
+                        <h4 id="storyUserName" class="text-xs font-bold text-white"></h4>
+                        <span id="storyTime" class="text-[9px] text-slate-400">Сегодня</span>
+                    </div>
+                </div>
+                <button onclick="app.closeStoryViewer()" class="text-white hover:text-slate-300 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Story Image Content -->
+            <div class="my-auto relative flex items-center justify-center overflow-hidden rounded-2xl h-full mt-3">
+                <img id="storyImg" src="" class="w-full h-full object-cover rounded-2xl">
+            </div>
+
+            <!-- Story Reply Box -->
+            <div class="flex items-center gap-2 mt-3 z-10">
+                <input type="text" placeholder="Ответить на историю..." class="flex-1 bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none">
+                <button onclick="app.showToast('Ответ отправлен!')" class="bg-brand-600 text-white p-2 rounded-xl text-xs"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 1: Create New Post -->
+    <div id="newPostModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg p-5 shadow-2xl relative">
+            <button onclick="app.closeNewPostModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h3 class="text-base font-bold text-slate-100 mb-3">Новая публикация</h3>
+
+            <div class="flex items-center gap-3 mb-3">
+                <img id="modalUserAvatar" src="" class="w-9 h-9 rounded-full object-cover border border-slate-700">
+                <div>
+                    <h4 id="modalUserName" class="text-xs font-bold text-slate-200"></h4>
+                    <span class="text-[10px] text-brand-400">Видно всем подписчикам</span>
+                </div>
+            </div>
+
+            <textarea id="modalPostText" rows="4" placeholder="Напишите текст публикации..." 
+                class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-100 focus:outline-none focus:border-brand-500 resize-none mb-3"></textarea>
+
+            <div class="mb-4">
+                <label class="block text-[11px] font-semibold text-slate-400 mb-1">Прикрепить ссылку на изображение или файл</label>
+                <input type="text" id="modalPostImageUrl" placeholder="https://images.unsplash.com/..." 
+                    class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-brand-500 focus:outline-none">
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                <button onclick="app.closeNewPostModal()" class="px-4 py-2 text-xs font-semibold text-slate-400">Отмена</button>
+                <button onclick="app.submitNewPostModal()" class="bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs px-5 py-2 rounded-xl transition shadow-lg shadow-brand-600/30">
+                    Опубликовать
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Edit Profile -->
+    <div id="editProfileModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-5 shadow-2xl relative">
+            <button onclick="app.closeEditProfileModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h3 class="text-base font-bold text-slate-100 mb-3">Редактировать профиль</h3>
+
+            <div class="flex flex-col gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Имя и Фамилия</label>
+                    <input type="text" id="editFullName" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 focus:border-brand-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Аватар профиля</label>
+                    <div class="flex items-center gap-3 mb-2">
+                        <img id="editAvatarPreview" src="" class="w-10 h-10 rounded-full object-cover border border-brand-500">
+                        <label for="editAvatarFile" class="cursor-pointer inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-700 transition">
+                            <i class="fa-solid fa-upload text-brand-400"></i>
+                            <span>Загрузить новое фото (ПК / Галерея)</span>
+                        </label>
+                        <input type="file" id="editAvatarFile" accept="image/*" onchange="app.handleAvatarFileSelect(event, 'edit')" class="hidden">
+                    </div>
+                    <input type="text" id="editAvatarUrl" placeholder="Или вставьте ссылку URL" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 focus:border-brand-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">О себе</label>
+                    <textarea id="editBio" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 focus:border-brand-500 focus:outline-none resize-none"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 mt-2">
+                    <button onclick="app.closeEditProfileModal()" class="px-4 py-2 text-xs font-semibold text-slate-400">Отмена</button>
+                    <button onclick="app.saveProfileChanges()" class="bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs px-5 py-2 rounded-xl transition">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Report Complaint -->
+    <div id="reportModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-5 shadow-2xl relative">
+            <button onclick="app.closeReportModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="flex items-center gap-2 mb-3">
+                <i class="fa-solid fa-flag text-rose-500 text-lg"></i>
+                <h3 class="text-base font-bold text-slate-100">Пожаловаться на публикацию</h3>
+            </div>
+            
+            <p id="reportTargetInfo" class="text-xs text-slate-400 mb-4 bg-slate-950 p-2.5 rounded-xl border border-slate-800"></p>
+
+            <input type="hidden" id="reportPostId">
+            <input type="hidden" id="reportTargetUserId">
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Причина жалобы</label>
+                    <select id="reportReason" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-brand-500 focus:outline-none">
+                        <option value="Спам или реклама">Спам или реклама</option>
+                        <option value="Оскорбления и агрессия">Оскорбления и агрессивное поведение</option>
+                        <option value="Запрещенный контент">Запрещенный контент</option>
+                        <option value="Выдавание себя за другого">Выдавание себя за другого человека</option>
+                        <option value="Другое">Другое</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Подробности (необязательно)</label>
+                    <textarea id="reportDetails" rows="3" placeholder="Опишите подробнее причину вашей жалобы для администратора..." 
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 focus:border-brand-500 focus:outline-none resize-none"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                    <button onclick="app.closeReportModal()" class="px-4 py-2 text-xs font-semibold text-slate-400">Отмена</button>
+                    <button onclick="app.submitReport()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs px-5 py-2 rounded-xl transition shadow-lg shadow-rose-600/30">
+                        Отправить администратору
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- FIREBASE & APPLICATION LOGIC               -->
+    <!-- ========================================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, updateDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Setup & Environment Detection
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pulsenet-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "demo", authDomain: "demo.firebaseapp.com", projectId: "demo", storageBucket: "demo.appspot.com"
+        };
+
+        const appFirebase = initializeApp(firebaseConfig);
+        const auth = getAuth(appFirebase);
+        const db = getFirestore(appFirebase);
+
+        const AVATAR_PRESETS = [
+            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+            "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80",
+            "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80",
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+            "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80"
+        ];
+
+        class SocialApp {
+            constructor() {
+                this.users = [];
+                this.posts = [];
+                this.reports = [];
+                this.notifications = [
+                    { id: 'n1', title: 'Добро пожаловать в PulseNet!', time: 'Только что', type: 'system', icon: 'fa-bolt', color: 'text-brand-400' },
+                    { id: 'n2', title: 'Администратор @Samori обновил правила', time: '10 мин назад', type: 'admin', icon: 'fa-shield-halved', color: 'text-amber-400' }
+                ];
+                this.chats = {};
+                this.currentUserId = null;
+                this.activeTab = 'feed';
+                this.feedFilter = 'all';
+                this.activeChatUserId = null;
+                this.storyTimer = null;
+
+                this.initAuthAndData();
+            }
+
+            showToast(message, type = 'info') {
+                const container = document.getElementById('toastContainer');
+                if (!container) return;
+
+                const toast = document.createElement('div');
+                toast.className = `glass px-4 py-2.5 rounded-2xl text-xs font-semibold shadow-2xl flex items-center gap-2.5 border transition-all duration-300 pointer-events-auto transform translate-y-2 opacity-0 ${
+                    type === 'error' ? 'bg-rose-950/90 border-rose-800 text-rose-200' : 'bg-slate-900/90 border-brand-500/50 text-slate-100'
+                }`;
+                toast.innerHTML = `
+                    <i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation text-rose-400' : 'fa-circle-check text-brand-400'}"></i>
+                    <span>${message}</span>
+                `;
+                container.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-2', 'opacity-0');
+                }, 10);
+
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', '-translate-y-2');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3500);
+            }
+
+            async initAuthAndData() {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (e) {
+                    console.log("Auth initialized");
+                }
+
+                this.setupRealtimeListeners();
+                this.renderAuthAvatarPresets();
+            }
+
+            setupRealtimeListeners() {
+                const usersCol = collection(db, 'artifacts', appId, 'public', 'data', 'users');
+                const postsCol = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
+                const reportsCol = collection(db, 'artifacts', appId, 'public', 'data', 'reports');
+
+                onSnapshot(usersCol, (snap) => {
+                    const loaded = [];
+                    snap.forEach(docSnap => loaded.push({ id: docSnap.id, ...docSnap.data() }));
+                    
+                    if (!loaded.some(u => u.username.toLowerCase() === 'samori')) {
+                        const adminObj = {
+                            id: 'usr_samori',
+                            fullName: 'Samori Admin',
+                            username: 'Samori',
+                            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+                            bio: 'Главный Администратор PulseNet 🛡️️',
+                            followers: 999,
+                            following: 0,
+                            isBlocked: false
+                        };
+                        setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', 'usr_samori'), adminObj);
+                        loaded.push(adminObj);
+                    }
+
+                    this.users = loaded;
+                    this.renderAuthDemoUsers();
+                    this.updateCurrentUserUI();
+                    if (this.activeTab === 'admin') this.renderAdminPanel();
+                }, (err) => console.log(err));
+
+                onSnapshot(postsCol, (snap) => {
+                    const loadedPosts = [];
+                    snap.forEach(docSnap => loadedPosts.push({ id: docSnap.id, ...docSnap.data() }));
+                    loadedPosts.sort((a, b) => b.timestamp - a.timestamp);
+                    this.posts = loadedPosts;
+                    this.renderPosts();
+                    if (this.activeTab === 'profile') this.renderProfileView();
+                    if (this.activeTab === 'admin') this.renderAdminPanel();
+                }, (err) => console.log(err));
+
+                onSnapshot(reportsCol, (snap) => {
+                    const loadedReports = [];
+                    snap.forEach(docSnap => loadedReports.push({ id: docSnap.id, ...docSnap.data() }));
+                    this.reports = loadedReports;
+                    if (this.activeTab === 'admin') this.renderAdminPanel();
+                }, (err) => console.log(err));
+            }
+
+            handleAvatarFileSelect(e, mode) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const dataUrl = event.target.result;
+                    if (mode === 'auth') {
+                        document.getElementById('authAvatarPreview').src = dataUrl;
+                        document.getElementById('selectedAuthAvatar').value = dataUrl;
+                    } else if (mode === 'edit') {
+                        document.getElementById('editAvatarPreview').src = dataUrl;
+                        document.getElementById('editAvatarUrl').value = dataUrl;
+                    }
+                    this.showToast('Фото успешно выбрано!');
+                };
+                reader.readAsDataURL(file);
+            }
+
+            handlePostFileSelect(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const dataUrl = event.target.result;
+                    document.getElementById('composerImageUrl').value = dataUrl;
+                    document.getElementById('composerPreviewImg').src = dataUrl;
+                    document.getElementById('composerPreviewBox').classList.remove('hidden');
+                    this.showToast('Изображение загружено!');
+                };
+                reader.readAsDataURL(file);
+            }
+
+            clearComposerMedia() {
+                document.getElementById('composerImageUrl').value = '';
+                document.getElementById('composerPreviewBox').classList.add('hidden');
+            }
+
+            renderAuthAvatarPresets() {
+                const container = document.getElementById('authAvatarSelector');
+                if (!container) return;
+                container.innerHTML = AVATAR_PRESETS.map((url, idx) => `
+                    <img src="${url}" onclick="app.selectAuthAvatar('${url}', this)" 
+                        class="w-9 h-9 rounded-full object-cover cursor-pointer ring-2 ${idx === 0 ? 'ring-brand-500 scale-105' : 'ring-transparent'} hover:scale-105 transition flex-shrink-0">
+                `).join('');
+            }
+
+            selectAuthAvatar(url, el) {
+                document.getElementById('selectedAuthAvatar').value = url;
+                document.getElementById('authAvatarPreview').src = url;
+                document.querySelectorAll('#authAvatarSelector img').forEach(img => img.classList.replace('ring-brand-500', 'ring-transparent'));
+                if (el) el.classList.replace('ring-transparent', 'ring-brand-500');
+            }
+
+            switchAuthMode(mode) {
+                const isReg = mode === 'register';
+                document.getElementById('authFormRegister').classList.toggle('hidden', !isReg);
+                document.getElementById('authFormDemo').classList.toggle('hidden', isReg);
+
+                document.getElementById('authTabRegister').className = isReg 
+                    ? "flex-1 py-2 text-xs font-bold rounded-xl bg-brand-600 text-white transition shadow-md"
+                    : "flex-1 py-2 text-xs font-bold rounded-xl text-slate-400 hover:text-white transition";
+                
+                document.getElementById('authTabDemo').className = !isReg 
+                    ? "flex-1 py-2 text-xs font-bold rounded-xl bg-brand-600 text-white transition shadow-md"
+                    : "flex-1 py-2 text-xs font-bold rounded-xl text-slate-400 hover:text-white transition";
+            }
+
+            renderAuthDemoUsers() {
+                const container = document.getElementById('authDemoUsersList');
+                if (!container) return;
+                container.innerHTML = this.users.map(u => `
+                    <div onclick="app.loginAsUser('${u.id}')" class="p-3 rounded-2xl bg-slate-900 border ${u.username.toLowerCase() === 'samori' ? 'border-amber-500/80 bg-amber-950/20' : 'border-slate-800'} hover:border-brand-500 cursor-pointer transition flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                            <img src="${u.avatar}" class="w-10 h-10 rounded-full object-cover border border-slate-700 flex-shrink-0">
+                            <div>
+                                <div class="flex items-center gap-1.5">
+                                    <h4 class="text-xs font-bold text-slate-200 group-hover:text-brand-400 transition">${u.fullName}</h4>
+                                    ${u.username.toLowerCase() === 'samori' ? '<span class="text-[9px] bg-amber-500 text-slate-950 px-1 rounded font-black">ADMIN</span>' : ''}
+                                    ${u.isBlocked ? '<span class="text-[9px] bg-rose-500 text-white px-1 rounded font-bold">ЗАБЛОКИРОВАН</span>' : ''}
+                                </div>
+                                <p class="text-[11px] text-slate-400">@${u.username}</p>
+                            </div>
+                        </div>
+                        <span class="text-xs text-brand-400 font-semibold flex items-center gap-1">
+                            Войти <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </span>
+                    </div>
+                `).join('');
+            }
+
+            async handleAuthSubmit(e) {
+                e.preventDefault();
+                const fullName = document.getElementById('authFullName').value.trim();
+                const username = document.getElementById('authUsername').value.trim().replace(/\s+/g, '_');
+                const avatar = document.getElementById('selectedAuthAvatar').value || AVATAR_PRESETS[0];
+                const bio = document.getElementById('authBio').value.trim() || 'Пользователь PulseNet';
+
+                if (!fullName || !username) return;
+
+                const existing = this.users.find(u => u.username.toLowerCase() === username.toLowerCase());
+                if (existing) {
+                    this.loginAsUser(existing.id);
+                    return;
+                }
+
+                const uid = 'usr_' + Date.now();
+                const newUser = {
+                    id: uid,
+                    fullName,
+                    username,
+                    avatar,
+                    bio,
+                    followers: 0,
+                    following: 1,
+                    isBlocked: false
+                };
+
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid), newUser);
+                this.loginAsUser(uid);
+            }
+
+            loginAsUser(userId) {
+                this.currentUserId = userId;
+                document.getElementById('authGateScreen').classList.add('hidden');
+                document.getElementById('mainAppScreen').classList.remove('hidden');
+                document.getElementById('mainAppScreen').classList.add('flex');
+
+                const user = this.getCurrentUser();
+                this.showToast(`Добро пожаловать, ${user.fullName}!`);
+
+                this.updateCurrentUserUI();
+                this.renderStories();
+                this.renderHashtags();
+                this.renderSuggestedUsers();
+                this.switchTab('feed');
+            }
+
+            openAuthGate() {
+                document.getElementById('mainAppScreen').classList.add('hidden');
+                document.getElementById('mainAppScreen').classList.remove('flex');
+                document.getElementById('authGateScreen').classList.remove('hidden');
+            }
+
+            getCurrentUser() {
+                return this.users.find(u => u.id === this.currentUserId) || {
+                    id: 'usr_guest', fullName: 'Гость', username: 'guest', avatar: AVATAR_PRESETS[0], isBlocked: false
+                };
+            }
+
+            getUserById(id) {
+                return this.users.find(u => u.id === id) || {
+                    fullName: 'Пользователь PulseNet', username: 'user', avatar: AVATAR_PRESETS[0], isBlocked: false
+                };
+            }
+
+            isAdmin() {
+                const me = this.getCurrentUser();
+                return me && me.username && me.username.toLowerCase() === 'samori';
+            }
+
+            updateCurrentUserUI() {
+                const user = this.getCurrentUser();
+                const isAdmin = this.isAdmin();
+
+                document.getElementById('headerUserAvatar').src = user.avatar;
+                document.getElementById('headerUserName').textContent = user.fullName;
+                document.getElementById('dropdownFullName').textContent = user.fullName;
+                document.getElementById('dropdownUsername').textContent = `@${user.username}`;
+
+                document.getElementById('sidebarUserAvatar').src = user.avatar;
+                document.getElementById('sidebarUserName').textContent = user.fullName;
+                document.getElementById('sidebarUserHandle').textContent = `@${user.username}`;
+
+                document.getElementById('composerUserAvatar').src = user.avatar;
+                document.getElementById('modalUserAvatar').src = user.avatar;
+                document.getElementById('modalUserName').textContent = user.fullName;
+
+                document.getElementById('dropdownAdminBtn').classList.toggle('hidden', !isAdmin);
+                document.getElementById('nav-admin').classList.toggle('hidden', !isAdmin);
+                document.getElementById('sidebarAdminBadge').classList.toggle('hidden', !isAdmin);
+
+                document.getElementById('blockedUserBanner').classList.toggle('hidden', !user.isBlocked);
+            }
+
+            switchTab(tabName) {
+                if (tabName === 'admin' && !this.isAdmin()) {
+                    tabName = 'feed';
+                }
+
+                this.activeTab = tabName;
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+                
+                const targetTab = document.getElementById(`tab-${tabName}`);
+                if (targetTab) targetTab.classList.remove('hidden');
+
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('bg-brand-600/20', 'text-brand-400', 'border', 'border-brand-500/30');
+                });
+                const activeBtn = document.getElementById(`nav-${tabName}`);
+                if (activeBtn) {
+                    activeBtn.classList.add('bg-brand-600/20', 'text-brand-400', 'border', 'border-brand-500/30');
+                }
+
+                if (tabName === 'profile') this.renderProfileView();
+                if (tabName === 'admin') this.renderAdminPanel();
+                if (tabName === 'messages') this.renderChatContacts();
+                if (tabName === 'notifications') this.renderNotifications();
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            renderStories() {
+                const storiesContainer = document.getElementById('storiesContainer');
+                if (!storiesContainer) return;
+                storiesContainer.innerHTML = this.users.map(user => `
+                    <div onclick="app.openStoryViewer('${user.id}')" class="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer group">
+                        <div class="p-0.5 rounded-full bg-gradient-to-tr from-brand-500 via-purple-500 to-amber-400 group-hover:scale-105 transition">
+                            <img src="${user.avatar}" class="w-11 h-11 rounded-full object-cover ring-2 ring-slate-950">
+                        </div>
+                        <span class="text-[10px] text-slate-300 font-medium max-w-[60px] truncate">${user.id === this.currentUserId ? 'Вы' : user.fullName.split(' ')[0]}</span>
+                    </div>
+                `).join('');
+            }
+
+            openStoryViewer(userId) {
+                const user = this.getUserById(userId);
+                document.getElementById('storyUserAvatar').src = user.avatar;
+                document.getElementById('storyUserName').textContent = user.fullName;
+                
+                const sampleStoryImg = user.avatar.includes('unsplash') 
+                    ? user.avatar 
+                    : 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80';
+                
+                document.getElementById('storyImg').src = sampleStoryImg;
+                document.getElementById('storyViewerModal').classList.remove('hidden');
+
+                const bar = document.getElementById('storyProgressBar');
+                bar.style.width = '0%';
+                
+                let progress = 0;
+                clearInterval(this.storyTimer);
+                this.storyTimer = setInterval(() => {
+                    progress += 2;
+                    bar.style.width = `${progress}%`;
+                    if (progress >= 100) {
+                        clearInterval(this.storyTimer);
+                        this.closeStoryViewer();
+                    }
+                }, 100);
+            }
+
+            closeStoryViewer() {
+                clearInterval(this.storyTimer);
+                document.getElementById('storyViewerModal').classList.add('hidden');
+            }
+
+            setFeedFilter(filter) {
+                this.feedFilter = filter;
+                document.querySelectorAll('#filter-all, #filter-popular, #filter-saved').forEach(btn => {
+                    btn.className = "px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-400 hover:text-white transition";
+                });
+                const activeFilterBtn = document.getElementById(`filter-${filter}`);
+                if (activeFilterBtn) {
+                    activeFilterBtn.className = "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-brand-600 text-white transition";
+                }
+                this.renderPosts();
+            }
+
+            renderPosts() {
+                const container = document.getElementById('postsFeedContainer');
+                if (!container) return;
+
+                let postsToRender = [...this.posts];
+                if (this.feedFilter === 'popular') {
+                    postsToRender.sort((a, b) => (b.likes ? b.likes.length : 0) - (a.likes ? a.likes.length : 0));
+                } else if (this.feedFilter === 'saved') {
+                    postsToRender = postsToRender.filter(p => p.bookmarks && p.bookmarks.includes(this.currentUserId));
+                }
+
+                if (postsToRender.length === 0) {
+                    container.innerHTML = `
+                        <div class="glass rounded-2xl p-6 text-center text-slate-400">
+                            <i class="fa-regular fa-folder-open text-2xl mb-1 text-slate-600"></i>
+                            <p class="text-xs">Публикаций пока нет. Создайте первую запись!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = postsToRender.map(post => this.createPostCardHTML(post)).join('');
+            }
+
+            createPostCardHTML(post) {
+                const author = this.getUserById(post.userId);
+                const isLiked = post.likes && post.likes.includes(this.currentUserId);
+                const isBookmarked = post.bookmarks && post.bookmarks.includes(this.currentUserId);
+                const isOwner = post.userId === this.currentUserId;
+                const isAdmin = this.isAdmin();
+
+                return `
+                    <div class="glass rounded-2xl p-4 flex flex-col gap-3 transition hover:border-slate-700/80">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <img src="${author.avatar}" class="w-9 h-9 rounded-full object-cover ring-1 ring-slate-700">
+                                <div>
+                                    <div class="flex items-center gap-1.5">
+                                        <h4 class="text-xs font-bold text-slate-100 hover:underline cursor-pointer">${author.fullName}</h4>
+                                        ${author.username.toLowerCase() === 'samori' ? '<span class="text-[9px] bg-amber-500 text-slate-950 px-1 rounded font-black">ADMIN</span>' : ''}
+                                    </div>
+                                    <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
+                                        <span>@${author.username}</span>
+                                        <span>•</span>
+                                        <span>${post.createdAt || 'Недавно'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-1">
+                                ${!isOwner ? `
+                                    <button onclick="app.openReportModal('${post.id}', '${author.id}')" title="Пожаловаться" class="text-slate-500 hover:text-rose-400 text-xs px-2 py-1 rounded-lg hover:bg-slate-800 transition">
+                                        <i class="fa-regular fa-flag"></i>
+                                    </button>
+                                ` : ''}
+
+                                ${(isOwner || isAdmin) ? `
+                                    <button onclick="app.deletePost('${post.id}')" title="Удалить" class="text-slate-500 hover:text-rose-400 text-xs px-2 py-1 rounded-lg hover:bg-slate-800 transition">
+                                        <i class="fa-regular fa-trash-can"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <p class="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-line">${post.text}</p>
+
+                        ${post.imageUrl ? `
+                            <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950/60 max-h-80">
+                                <img src="${post.imageUrl}" class="w-full h-full object-cover hover:scale-105 transition duration-500" loading="lazy">
+                            </div>
+                        ` : ''}
+
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 text-xs">
+                            <div class="flex items-center gap-4">
+                                <button onclick="app.toggleLike('${post.id}')" class="flex items-center gap-1.5 font-semibold transition ${isLiked ? 'text-rose-500' : 'text-slate-400 hover:text-slate-200'}">
+                                    <i class="${isLiked ? 'fa-solid fa-heart animate-heart text-rose-500' : 'fa-regular fa-heart'} text-sm"></i>
+                                    <span>${post.likes ? post.likes.length : 0}</span>
+                                </button>
+                                <span class="flex items-center gap-1.5 text-slate-400 font-semibold">
+                                    <i class="fa-regular fa-comment text-sm"></i>
+                                    <span>${post.comments ? post.comments.length : 0}</span>
+                                </span>
+                            </div>
+                            <button onclick="app.toggleBookmark('${post.id}')" class="${isBookmarked ? 'text-amber-400' : 'text-slate-400 hover:text-slate-200'} transition">
+                                <i class="${isBookmarked ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'} text-sm"></i>
+                            </button>
+                        </div>
+
+                        <div id="comments-${post.id}" class="mt-1 pt-2 border-t border-slate-800/60 flex flex-col gap-2">
+                            ${(post.comments || []).map(c => {
+                                const commentUser = this.getUserById(c.userId);
+                                return `
+                                    <div class="bg-slate-900/70 p-2 rounded-xl border border-slate-800/80 flex items-start gap-2 text-xs">
+                                        <img src="${commentUser.avatar}" class="w-6 h-6 rounded-full object-cover mt-0.5">
+                                        <div class="flex-1">
+                                            <div class="flex items-center justify-between">
+                                                <span class="font-bold text-slate-200 text-[11px]">${commentUser.fullName}</span>
+                                                <span class="text-[9px] text-slate-500">${c.time}</span>
+                                            </div>
+                                            <p class="text-slate-300 text-[11px] mt-0.5">${c.text}</p>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+
+                            <div class="flex items-center gap-2 mt-1">
+                                <input type="text" id="commentInput-${post.id}" placeholder="Написать комментарий..." 
+                                    onkeypress="if(event.key==='Enter') app.addComment('${post.id}')"
+                                    class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500">
+                                <button onclick="app.addComment('${post.id}')" class="bg-brand-600 hover:bg-brand-500 text-white text-[11px] font-semibold px-3 py-1.5 rounded-xl transition">
+                                    Отправить
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            async toggleLike(postId) {
+                const post = this.posts.find(p => p.id === postId);
+                if (!post) return;
+
+                const likes = post.likes || [];
+                const idx = likes.indexOf(this.currentUserId);
+                if (idx === -1) {
+                    likes.push(this.currentUserId);
+                } else {
+                    likes.splice(idx, 1);
+                }
+
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId), { likes });
+            }
+
+            async toggleBookmark(postId) {
+                const post = this.posts.find(p => p.id === postId);
+                if (!post) return;
+
+                const bookmarks = post.bookmarks || [];
+                const idx = bookmarks.indexOf(this.currentUserId);
+                if (idx === -1) {
+                    bookmarks.push(this.currentUserId);
+                    this.showToast('Сохранено в закладки');
+                } else {
+                    bookmarks.splice(idx, 1);
+                    this.showToast('Удалено из закладок');
+                }
+
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId), { bookmarks });
+            }
+
+            async addComment(postId) {
+                const me = this.getCurrentUser();
+                if (me.isBlocked) {
+                    this.showToast('Ваш аккаунт заблокирован. Вы не можете оставлять комментарии.', 'error');
+                    return;
+                }
+
+                const input = document.getElementById(`commentInput-${postId}`);
+                if (!input || !input.value.trim()) return;
+
+                const post = this.posts.find(p => p.id === postId);
+                if (!post) return;
+
+                const comments = post.comments || [];
+                comments.push({
+                    id: 'c_' + Date.now(),
+                    userId: this.currentUserId,
+                    text: input.value.trim(),
+                    time: 'Только что'
+                });
+
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId), { comments });
+                input.value = '';
+                this.showToast('Комментарий опубликован!');
+            }
+
+            async deletePost(postId) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId));
+                this.showToast('Публикация удалена');
+            }
+
+            toggleUserDropdown() {
+                document.getElementById('userDropdown').classList.toggle('hidden');
+            }
+
+            toggleComposerMedia() {
+                document.getElementById('composerMediaExpand').classList.toggle('hidden');
+            }
+
+            insertTagIntoComposer(tag) {
+                const input = document.getElementById('composerInput');
+                input.value += ` ${tag} `;
+                input.focus();
+            }
+
+            async createPostFromComposer() {
+                const me = this.getCurrentUser();
+                if (me.isBlocked) {
+                    this.showToast('Ваш аккаунт заблокирован администратором.', 'error');
+                    return;
+                }
+
+                const text = document.getElementById('composerInput').value.trim();
+                const imageUrl = document.getElementById('composerImageUrl').value.trim();
+
+                if (!text && !imageUrl) return;
+
+                const postId = 'post_' + Date.now();
+                const newPost = {
+                    id: postId,
+                    userId: this.currentUserId,
+                    text: text || 'Опубликовано новое изображение',
+                    imageUrl: imageUrl,
+                    createdAt: 'Только что',
+                    timestamp: Date.now(),
+                    likes: [],
+                    bookmarks: [],
+                    comments: []
+                };
+
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId), newPost);
+
+                document.getElementById('composerInput').value = '';
+                this.clearComposerMedia();
+                document.getElementById('composerMediaExpand').classList.add('hidden');
+                this.showToast('Запись успешно создана!');
+            }
+
+            openNewPostModal() {
+                document.getElementById('newPostModal').classList.remove('hidden');
+            }
+
+            closeNewPostModal() {
+                document.getElementById('newPostModal').classList.add('hidden');
+            }
+
+            async submitNewPostModal() {
+                const me = this.getCurrentUser();
+                if (me.isBlocked) {
+                    this.showToast('Ваш аккаунт заблокирован.', 'error');
+                    return;
+                }
+
+                const text = document.getElementById('modalPostText').value.trim();
+                const imageUrl = document.getElementById('modalPostImageUrl').value.trim();
+
+                if (!text) return;
+
+                const postId = 'post_' + Date.now();
+                const newPost = {
+                    id: postId,
+                    userId: this.currentUserId,
+                    text,
+                    imageUrl,
+                    createdAt: 'Только что',
+                    timestamp: Date.now(),
+                    likes: [],
+                    bookmarks: [],
+                    comments: []
+                };
+
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId), newPost);
+
+                document.getElementById('modalPostText').value = '';
+                document.getElementById('modalPostImageUrl').value = '';
+                this.closeNewPostModal();
+                this.showToast('Публикация отправлена!');
+            }
+
+            openReportModal(postId, targetUserId) {
+                const post = this.posts.find(p => p.id === postId);
+                const targetUser = this.getUserById(targetUserId);
+
+                document.getElementById('reportPostId').value = postId;
+                document.getElementById('reportTargetUserId').value = targetUserId;
+                document.getElementById('reportTargetInfo').innerHTML = `Жалоба на запись от <b>${targetUser.fullName}</b> (@${targetUser.username}):<br>"${post ? post.text.substring(0, 80) : ''}..."`;
+
+                document.getElementById('reportModal').classList.remove('hidden');
+            }
+
+            closeReportModal() {
+                document.getElementById('reportModal').classList.add('hidden');
+            }
+
+            async submitReport() {
+                const postId = document.getElementById('reportPostId').value;
+                const targetUserId = document.getElementById('reportTargetUserId').value;
+                const reason = document.getElementById('reportReason').value;
+                const details = document.getElementById('reportDetails').value.trim();
+
+                const reportId = 'rep_' + Date.now();
+                const newReport = {
+                    id: reportId,
+                    reporterId: this.currentUserId,
+                    targetUserId: targetUserId,
+                    postId: postId,
+                    reason: reason,
+                    details: details,
+                    timestamp: Date.now(),
+                    status: 'active'
+                };
+
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', reportId), newReport);
+
+                this.showToast('Жалоба отправлена администратору!');
+                this.closeReportModal();
+            }
+
+            renderNotifications() {
+                const container = document.getElementById('notificationsList');
+                if (!container) return;
+
+                if (this.notifications.length === 0) {
+                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Нет новых уведомлений</p>`;
+                    return;
+                }
+
+                container.innerHTML = this.notifications.map(n => `
+                    <div class="p-3 bg-slate-900/80 border border-slate-800 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center ${n.color}">
+                                <i class="fa-solid ${n.icon}"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-200">${n.title}</p>
+                                <span class="text-[10px] text-slate-500">${n.time}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            clearNotifications() {
+                this.notifications = [];
+                this.renderNotifications();
+                this.showToast('Уведомления очищены');
+            }
+
+            renderAdminPanel() {
+                if (!this.isAdmin()) return;
+
+                const totalUsers = this.users.length;
+                const totalPosts = this.posts.length;
+                let totalLikes = 0;
+                let totalComments = 0;
+
+                this.posts.forEach(p => {
+                    totalLikes += p.likes ? p.likes.length : 0;
+                    totalComments += p.comments ? p.comments.length : 0;
+                });
+
+                const activeReports = this.reports.filter(r => r.status === 'active');
+
+                document.getElementById('statTotalUsers').textContent = totalUsers;
+                document.getElementById('statTotalPosts').textContent = totalPosts;
+                document.getElementById('statTotalInteractions').textContent = `${totalLikes} / ${totalComments}`;
+                document.getElementById('statTotalReports').textContent = activeReports.length;
+                document.getElementById('reportsCountBadge').textContent = `${activeReports.length} активных`;
+
+                const reportsContainer = document.getElementById('adminReportsList');
+                if (activeReports.length === 0) {
+                    reportsContainer.innerHTML = `
+                        <div class="p-4 text-center text-slate-500 text-xs">
+                            <i class="fa-solid fa-check-circle text-emerald-500 text-lg mb-1"></i>
+                            <p>Нет активных жалоб. Все спокойно!</p>
+                        </div>
+                    `;
+                } else {
+                    reportsContainer.innerHTML = activeReports.map(rep => {
+                        const reporter = this.getUserById(rep.reporterId);
+                        const targetUser = this.getUserById(rep.targetUserId);
+                        return `
+                            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                                <div class="text-xs space-y-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="bg-rose-500/20 text-rose-400 font-bold px-2 py-0.5 rounded text-[10px]">${rep.reason}</span>
+                                        <span class="text-slate-400">От: <b>${reporter.fullName}</b></span>
+                                    </div>
+                                    <p class="text-slate-200">Нарушитель: <b class="text-amber-400">${targetUser.fullName} (@${targetUser.username})</b></p>
+                                    ${rep.details ? `<p class="text-slate-400 italic">"${rep.details}"</p>` : ''}
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="app.adminBlockUser('${targetUser.id}', true)" class="bg-rose-600 hover:bg-rose-500 text-white font-bold text-[11px] px-3 py-1.5 rounded-lg transition">
+                                        Заблокировать
+                                    </button>
+                                    <button onclick="app.adminDismissReport('${rep.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[11px] px-3 py-1.5 rounded-lg transition">
+                                        Отклонить
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                const usersContainer = document.getElementById('adminUsersList');
+                usersContainer.innerHTML = this.users.map(u => `
+                    <div class="p-3 bg-slate-900/80 border border-slate-800 rounded-xl flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <img src="${u.avatar}" class="w-8 h-8 rounded-full object-cover">
+                            <div class="truncate">
+                                <div class="flex items-center gap-1.5">
+                                    <h4 class="text-xs font-bold text-slate-200 truncate">${u.fullName}</h4>
+                                    ${u.username.toLowerCase() === 'samori' ? '<span class="text-[9px] bg-amber-500 text-slate-950 px-1 rounded font-black">ADMIN</span>' : ''}
+                                </div>
+                                <p class="text-[10px] text-slate-400">@${u.username}</p>
+                            </div>
+                        </div>
+
+                        ${u.username.toLowerCase() !== 'samori' ? `
+                            <button onclick="app.adminBlockUser('${u.id}', ${!u.isBlocked})" 
+                                class="text-[11px] font-bold px-3 py-1 rounded-lg transition ${u.isBlocked ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-rose-950 text-rose-400 border border-rose-800/80 hover:bg-rose-900'}">
+                                ${u.isBlocked ? 'Разблокировать' : 'Заблокировать'}
+                            </button>
+                        ` : '<span class="text-[10px] text-amber-400 font-bold">Главный Админ</span>'}
+                    </div>
+                `).join('');
+            }
+
+            async adminBlockUser(userId, blockStatus) {
+                if (!this.isAdmin()) return;
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', userId), { isBlocked: blockStatus });
+                this.showToast(blockStatus ? 'Пользователь заблокирован' : 'Пользователь разблокирован');
+            }
+
+            async adminDismissReport(reportId) {
+                if (!this.isAdmin()) return;
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', reportId));
+                this.showToast('Жалоба отклонена');
+            }
+
+            renderProfileView() {
+                const user = this.getCurrentUser();
+                document.getElementById('profileAvatar').src = user.avatar;
+                document.getElementById('profileFullName').textContent = user.fullName;
+                document.getElementById('profileHandle').textContent = `@${user.username}`;
+                document.getElementById('profileBio').textContent = user.bio;
+                
+                document.getElementById('profileAdminBadge').classList.toggle('hidden', user.username.toLowerCase() !== 'samori');
+
+                const myPosts = this.posts.filter(p => p.userId === user.id);
+                document.getElementById('profilePostCount').textContent = myPosts.length;
+                document.getElementById('profileFollowersCount').textContent = user.followers || 0;
+                document.getElementById('profileFollowingCount').textContent = user.following || 0;
+
+                const container = document.getElementById('profilePostsContainer');
+                if (!container) return;
+                if (myPosts.length === 0) {
+                    container.innerHTML = `<div class="glass rounded-2xl p-6 text-center text-slate-400 text-xs">У вас пока нет публикаций.</div>`;
+                } else {
+                    container.innerHTML = myPosts.map(post => this.createPostCardHTML(post)).join('');
+                }
+            }
+
+            openEditProfileModal() {
+                const user = this.getCurrentUser();
+                document.getElementById('editFullName').value = user.fullName;
+                document.getElementById('editAvatarUrl').value = user.avatar;
+                document.getElementById('editAvatarPreview').src = user.avatar;
+                document.getElementById('editBio').value = user.bio;
+                document.getElementById('editProfileModal').classList.remove('hidden');
+            }
+
+            closeEditProfileModal() {
+                document.getElementById('editProfileModal').classList.add('hidden');
+            }
+
+            async saveProfileChanges() {
+                const user = this.getCurrentUser();
+                const fullName = document.getElementById('editFullName').value.trim() || user.fullName;
+                const avatar = document.getElementById('editAvatarUrl').value.trim() || user.avatar;
+                const bio = document.getElementById('editBio').value.trim() || user.bio;
+
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', user.id), { fullName, avatar, bio });
+                this.closeEditProfileModal();
+                this.showToast('Профиль обновлен!');
+            }
+
+            renderChatContacts() {
+                const container = document.getElementById('chatContactsList');
+                if (!container) return;
+                const otherUsers = this.users.filter(u => u.id !== this.currentUserId);
+
+                container.innerHTML = otherUsers.map(u => `
+                    <div onclick="app.selectChat('${u.id}')" class="p-2.5 rounded-xl flex items-center gap-3 hover:bg-slate-800 cursor-pointer transition ${u.id === this.activeChatUserId ? 'bg-slate-800 border border-slate-700' : ''}">
+                        <img src="${u.avatar}" class="w-9 h-9 rounded-full object-cover flex-shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-xs font-bold text-slate-100 truncate">${u.fullName}</h4>
+                            <p class="text-[10px] text-slate-400 truncate">@${u.username}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            selectChat(otherUserId) {
+                this.activeChatUserId = otherUserId;
+                this.renderChatContacts();
+                const otherUser = this.getUserById(otherUserId);
+
+                const chatWinCol = document.getElementById('chatWindowCol');
+                chatWinCol.classList.remove('hidden');
+                chatWinCol.classList.add('flex');
+
+                document.getElementById('activeChatHeader').innerHTML = `
+                    <div class="flex items-center gap-2.5">
+                        <img src="${otherUser.avatar}" class="w-8 h-8 rounded-full object-cover">
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-100">${otherUser.fullName}</h4>
+                            <span class="text-[10px] text-emerald-400">В сети</span>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('chatInputArea').classList.remove('hidden');
+                const box = document.getElementById('chatMessagesBox');
+                box.innerHTML = `<div class="text-center text-xs text-slate-500 my-auto">Начните диалог с ${otherUser.fullName}</div>`;
+            }
+
+            sendChatMessage() {
+                const me = this.getCurrentUser();
+                if (me.isBlocked) {
+                    this.showToast('Ваш аккаунт заблокирован.', 'error');
+                    return;
+                }
+                const input = document.getElementById('chatMessageInput');
+                if (!input || !input.value.trim() || !this.activeChatUserId) return;
+
+                const text = input.value.trim();
+                const box = document.getElementById('chatMessagesBox');
+
+                const msgHtml = `
+                    <div class="flex flex-col items-end max-w-[85%] ml-auto">
+                        <div class="p-2.5 rounded-2xl text-xs bg-brand-600 text-white rounded-br-xs">
+                            ${text}
+                        </div>
+                        <span class="text-[9px] text-slate-500 mt-0.5">Только что</span>
+                    </div>
+                `;
+                box.insertAdjacentHTML('beforeend', msgHtml);
+                input.value = '';
+                box.scrollTop = box.scrollHeight;
+
+                // Simulated reply
+                setTimeout(() => {
+                    const otherUser = this.getUserById(this.activeChatUserId);
+                    const replyHtml = `
+                        <div class="flex flex-col items-start max-w-[85%] mr-auto">
+                            <div class="p-2.5 rounded-2xl text-xs bg-slate-800 text-slate-200 rounded-bl-xs">
+                                Спасибо за сообщение! Привет от ${otherUser.fullName.split(' ')[0]} 👋
+                            </div>
+                            <span class="text-[9px] text-slate-500 mt-0.5">Только что</span>
+                        </div>
+                    `;
+                    box.insertAdjacentHTML('beforeend', replyHtml);
+                    box.scrollTop = box.scrollHeight;
+                }, 1200);
+            }
+
+            renderHashtags() {
+                const hashtags = [
+                    { tag: '#администрирование', posts: '1.2k постов' },
+                    { tag: '#вебразработка', posts: '3.4k постов' },
+                    { tag: '#дизайн2026', posts: '980 постов' }
+                ];
+                document.getElementById('sidebarHashtags').innerHTML = hashtags.map(h => `
+                    <div class="flex items-center justify-between hover:bg-slate-800/50 p-1.5 rounded-lg transition cursor-pointer">
+                        <span class="text-xs font-semibold text-brand-400">${h.tag}</span>
+                        <span class="text-[10px] text-slate-500">${h.posts}</span>
+                    </div>
+                `).join('');
+            }
+
+            renderSuggestedUsers() {
+                const suggested = this.users.filter(u => u.id !== this.currentUserId);
+                document.getElementById('sidebarSuggestedUsers').innerHTML = suggested.map(u => `
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <img src="${u.avatar}" class="w-7 h-7 rounded-full object-cover">
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-200">${u.fullName}</h4>
+                                <p class="text-[9px] text-slate-400">@${u.username}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            handleSearch(query) {
+                const resultsDiv = document.getElementById('searchResults');
+                if (!query.trim()) {
+                    resultsDiv.classList.add('hidden');
+                    return;
+                }
+
+                const matchedUsers = this.users.filter(u => 
+                    u.fullName.toLowerCase().includes(query.toLowerCase()) || 
+                    u.username.toLowerCase().includes(query.toLowerCase())
+                );
+                
+                resultsDiv.classList.remove('hidden');
+                if (matchedUsers.length === 0) {
+                    resultsDiv.innerHTML = `<div class="p-2.5 text-xs text-slate-500 text-center">Ничего не найдено</div>`;
+                } else {
+                    resultsDiv.innerHTML = matchedUsers.map(u => `
+                        <div class="p-2 hover:bg-slate-800 rounded-xl flex items-center gap-2.5 cursor-pointer">
+                            <img src="${u.avatar}" class="w-8 h-8 rounded-full object-cover">
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-200">${u.fullName}</h4>
+                                <p class="text-[10px] text-slate-400">@${u.username}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        window.onload = function() {
+            window.app = new SocialApp();
+        };
+    </script>
+</body>
+</html>
